@@ -10,7 +10,7 @@ from puts import printc, timestamp_seconds
 from torch.utils.data import ConcatDataset
 from torchinfo import summary
 
-from DataLoader import lfcc, load_directory_split_train_test, mfcc
+from DataLoader import lfcc, load_directory_split_train_test, mfcc, AudioDataset, PadDataset, double_delta
 from models.cnn import ShallowCNN
 from models.lstm import SimpleLSTM, WaveLSTM
 from models.mlp import MLP
@@ -258,7 +258,7 @@ def train(
     )
 
 
-def eval_only(
+def eval_only_f(
     real_dir: Union[Path, str],
     fake_dir: Union[Path, str],
     amount_to_use: int = None,
@@ -392,8 +392,118 @@ def eval_only(
     )
 
 
+def eval_one_f(
+    test_file: Union[Path, str],
+    real_dir: Union[Path, str],
+    fake_dir: Union[Path, str],
+    amount_to_use: int = None,
+    epochs: int = 20,
+    device: str = "cuda" if torch.cuda.is_available else "cpu",
+    batch_size: int = 32,
+    save_dir: Union[str, Path] = None,
+    test_size: float = 0.2,
+    feature_classname: str = "wave",
+    model_classname: str = "SimpleLSTM",
+    in_distribution: bool = True,
+    checkpoint=None,
+) -> None:
+    """
+    Train a model on WaveFake data.
+
+    Args:
+        real_dir:
+            path to LJSpeech dataset directory
+        fake_dir:
+            path to WaveFake dataset directory
+        amount_to_use:
+            amount of data to use (if None, use all) (default: None)
+        epochs:
+            number of epochs to train for (default: 20)
+        device:
+            device to use (default: "cuda" if available)
+        batch_size:
+            batch size (default: 32)
+        save_dir:
+            directory to save model checkpoints to (default: None)
+        test_size:
+            ratio of test set / whole dataset (default: 0.2)
+        feature_classname:
+            classname of feature extractor (possible: "wave", "mfcc", "lfcc")
+        model_classname:
+            classname of model (possible: "SimpleLSTM", "ShallowCNN", "WaveLSTM", "MLP")
+        in_distribution:
+            whether to use in-distribution data (default: True)
+                - True: use 1:1 real:fake data (split melgan for training and test)
+                - False: use 1:7 real:fake data (use melgan for test only, others for training)
+
+    Returns:
+        None
+    """
+    feature_classname = feature_classname.lower()
+    assert feature_classname in FEATURE_CLASSNAMES
+    assert model_classname in MODEL_CLASSNAMES
+
+    # get feature transformation function
+    feature_fn = None if feature_classname == "wave" else eval(feature_classname)
+    assert feature_fn in (None, lfcc, mfcc)
+    # get model constructor
+    Model = eval(model_classname)
+    assert Model in (SimpleLSTM, ShallowCNN, WaveLSTM, MLP, TSSD, WaveRNN)
+
+    model_kwargs: dict = KWARGS_MAP.get(model_classname).get(feature_classname)
+    if model_kwargs is None:
+        raise ValueError(
+            f"model_kwargs not found for {model_classname} and {feature_classname}"
+        )
+    model_kwargs.update({"device": device})
+
+    LOGGER.info(f"Evaluating model: {model_classname}")
+    LOGGER.info(f"Input feature : {feature_classname}")
+    LOGGER.info(f"Model kwargs  : {json.dumps(model_kwargs, indent=2)}")
+
+    ###########################################################################
+
+    LOGGER.info("Loading data...")
+    
+    test_dataset = AudioDataset([test_file], phone_call=False)        
+    test_dataset = PadDataset(test_dataset, label=0)
+
+    if feature_fn is not None:
+        test_dataset = feature_fn(
+            directory_or_audiodataset=test_dataset,
+            transformkwargs={},
+        )
+        
+        test_dataset = double_delta(test_dataset)
+    ###########################################################################
+
+    # LOGGER.info(f"Training model on {len(dataset_train)} audio files.")
+    LOGGER.info(f"Testing model on  {len(test_dataset)} audio files.")
+    # LOGGER.info(f"Train/Test ratio: {len(dataset_train) / len(dataset_test)}")
+    # LOGGER.info(f"Real/Fake ratio in training: {round(pos_weight, 3)} (pos_weight)")
+
+    # pos_weight = torch.Tensor([pos_weight]).to(device)
+
+    model = Model(**model_kwargs).to(device)
+    input_size = (
+        (batch_size, 64600) if feature_classname == "wave" else (batch_size, 40, 972)
+    )
+    model_stats = summary(model, input_size, verbose=0)
+    summary_str = str(model_stats)
+    LOGGER.info(f"Model summary:\n{summary_str}")
+
+    ###########################################################################
+
+    ModelTrainer(batch_size=batch_size, epochs=epochs, device=device).eval_one(
+        model=model,
+        dataset_test=test_dataset,
+        checkpoint=checkpoint,
+    )
+
+
 def experiment(
     name: str,
+    test_file: str,
     real_dir: str,
     fake_dir: str,
     epochs: int,
@@ -406,6 +516,7 @@ def experiment(
     amount_to_use: Union[int, None] = None,
     restore: bool = False,
     eval_only: bool = False,
+    eval_one: bool = False,
     **kwargs,
 ):
 
@@ -424,10 +535,9 @@ def experiment(
     if seed is not None:
         set_seed_all(seed)
 
-    LOGGER.info(f"Batch size: {batch_size}, seed: {seed}, epochs: {epochs}")
-
-    if eval_only:
-        eval_only(
+    if eval_one:
+       eval_one_f(
+            test_file=test_file,
             real_dir=real_dir,
             fake_dir=fake_dir,
             amount_to_use=amount_to_use,
@@ -441,19 +551,35 @@ def experiment(
             checkpoint=ckpt,
         )
     else:
-        train(
-            real_dir=real_dir,
-            fake_dir=fake_dir,
-            amount_to_use=amount_to_use,
-            epochs=epochs,
-            device=device,
-            batch_size=batch_size,
-            save_dir=save_dir,
-            feature_classname=feature_classname,
-            model_classname=model_classname,
-            in_distribution=in_distribution,
-            checkpoint=ckpt,
-        )
+        if eval_only:
+            LOGGER.info(f"Batch size: {batch_size}, seed: {seed}, epochs: {epochs}")
+            eval_only_f(
+                real_dir=real_dir,
+                fake_dir=fake_dir,
+                amount_to_use=amount_to_use,
+                epochs=epochs,
+                device=device,
+                batch_size=batch_size,
+                save_dir=save_dir,
+                feature_classname=feature_classname,
+                model_classname=model_classname,
+                in_distribution=in_distribution,
+                checkpoint=ckpt,
+            )   
+        else:
+            train(
+                real_dir=real_dir,
+                fake_dir=fake_dir,
+                amount_to_use=amount_to_use,
+                epochs=epochs,
+                device=device,
+                batch_size=batch_size,
+                save_dir=save_dir,
+                feature_classname=feature_classname,
+                model_classname=model_classname,
+                in_distribution=in_distribution,
+                checkpoint=ckpt,
+            )
 
 
 def debug(real_dir: str, fake_dir: str, device: str):
@@ -499,6 +625,12 @@ def parse_args():
         help="Directory containing fake data. (default: 'data/fake')",
         type=str,
         default="data/fake",
+    )
+    parser.add_argument(
+        "--test_file",
+        "--test",
+        help="File for evaluation.",
+        type=str,        
     )
 
     parser.add_argument(
@@ -563,6 +695,11 @@ def parse_args():
         action="store_true",
     )
     parser.add_argument(
+        "--eval_one",
+        help="Whether to evaluate one.",
+        action="store_true",
+    )
+    parser.add_argument(
         "--debug",
         help="Whether to use debug mode.",
         action="store_true",
@@ -592,6 +729,7 @@ def main():
         printc(f">>>>> Starting experiment: {exp_name}")
         experiment(
             name=exp_name,
+            test_file=args.test_file,
             real_dir=args.real_dir,
             fake_dir=args.fake_dir,
             epochs=args.epochs,
@@ -604,6 +742,7 @@ def main():
             amount_to_use=160 if args.debug else None,
             restore=args.restore,
             eval_only=args.eval_only,
+            eval_one=args.eval_one,
         )
         printc(f">>>>> Experiment Done: {exp_name}\n\n")
     except Exception as e:

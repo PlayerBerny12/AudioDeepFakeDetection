@@ -258,3 +258,38 @@ class ModelTrainer(Trainer):
             save_path = save_dir / "best_pred.json"
             save_pred(y_true, y_pred, save_path)
             LOGGER.info(f"Prediction Saved: {save_path}")
+
+    def eval_one(
+        self,
+        model: nn.Module,
+        dataset_test: Dataset,
+        checkpoint: dict = None,
+    ) -> None:
+
+        test_loader = DataLoader(
+            dataset_test,
+            batch_size=self.batch_size,
+            drop_last=False,
+        )
+        #######################################################################
+
+        if checkpoint is not None:
+            model.load_state_dict(checkpoint["state_dict"])
+            # optim.load_state_dict(checkpoint["optimizer"])
+            start_epoch = checkpoint["epoch"] + 1
+            LOGGER.info(f"Loaded checkpoint from epoch {start_epoch - 1}")
+
+        ###################################################################
+        # evaluation
+        model.eval()
+
+        for batch_x, _, _, batch_y in test_loader:
+            # get batch input x
+            batch_x = batch_x.to(self.device)
+            # forward / inference
+            batch_out = model(batch_x)
+            # get binary prediction {0, 1}
+            batch_pred = (torch.sigmoid(batch_out) + 0.5).int()
+            
+            print(batch_out)
+            print(batch_pred)
