@@ -61,7 +61,7 @@ Use the [`train.py`](train.py) script to train the model.
 usage: train.py [-h] [--real_dir REAL_DIR] [--fake_dir FAKE_DIR] [--batch_size BATCH_SIZE] [--epochs EPOCHS]
                 [--seed SEED] [--feature_classname {wave,lfcc,mfcc}]
                 [--model_classname {MLP,WaveRNN,WaveLSTM,SimpleLSTM,ShallowCNN,TSSD}]
-                [--in_distribution {True,False}] [--device DEVICE] [--deterministic] [--restore] [--eval_only] [--debug] [--debug_all]
+                [--in_distribution {True,False}] [--device DEVICE] [--deterministic] [--restore] [--eval_only] [--eval_one] [--debug] [--debug_all]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -69,6 +69,8 @@ optional arguments:
                         Directory containing real data. (default: 'data/real')
   --fake_dir FAKE_DIR, --fake FAKE_DIR
                         Directory containing fake data. (default: 'data/fake')
+  --test_file TEST_FILE, --test TEST_FILE, 
+                        Path to file which should be evaluated
   --batch_size BATCH_SIZE
                         Batch size. (default: 256)
   --epochs EPOCHS       Number of maximum epochs to train. (default: 20)
@@ -83,6 +85,7 @@ optional arguments:
   --deterministic       Whether to use deterministic training (reproducible results).
   --restore             Whether to restore from checkpoint.
   --eval_only           Whether to evaluate only.
+  --eval_one            Whether to evaluate only one file specified by '--test_file'.
   --debug               Whether to use debug mode.
   --debug_all           Whether to use debug mode for all models.
 ```
@@ -115,6 +118,10 @@ To evaluate on the test set using trained model, you can run the following comma
 
 ```bash
 python train.py --feature_classname lfcc --model_classname ShallowCNN --restore --eval_only
+```
+
+```bash
+python train.py --feature_classname lfcc --model_classname ShallowCNN --restore --eval_one --test_file data/fake/filename.wav
 ```
 
 Run the following command to re-compute the evaluation results based on saved predictions and labels:
