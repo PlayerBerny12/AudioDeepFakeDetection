@@ -1,0 +1,87 @@
+2023-04-15 08:03:05,271 - INFO - Training model: TSSD
+2023-04-15 08:03:05,272 - INFO - Input feature : wave
+2023-04-15 08:03:05,272 - INFO - Model kwargs  : {
+  "in_dim": 64600,
+  "device": "cuda"
+}
+2023-04-15 08:03:05,275 - INFO - Loading data...
+2023-04-15 08:03:05,435 - INFO - Loading data from /mnt/Data/real...!
+2023-04-15 08:03:05,774 - INFO - Loading data from /mnt/Data/fake/ljspeech_melgan...!
+2023-04-15 08:03:05,953 - INFO - Loading data from /mnt/Data/fake/ljspeech_full_band_melgan...!
+2023-04-15 08:03:06,125 - INFO - Loading data from /mnt/Data/fake/ljspeech_hifiGAN...!
+2023-04-15 08:03:06,292 - INFO - Loading data from /mnt/Data/fake/ljspeech_melgan_large...!
+2023-04-15 08:03:06,551 - INFO - Loading data from /mnt/Data/fake/ljspeech_multi_band_melgan...!
+2023-04-15 08:03:06,715 - INFO - Loading data from /mnt/Data/fake/ljspeech_parallel_wavegan...!
+2023-04-15 08:03:06,875 - INFO - Loading data from /mnt/Data/fake/ljspeech_waveglow...!
+2023-04-15 08:03:06,878 - INFO - Training model on 88294 audio files.
+2023-04-15 08:03:06,878 - INFO - Testing model on  5240 audio files.
+2023-04-15 08:03:06,879 - INFO - Train/Test ratio: 16.85
+2023-04-15 08:03:06,879 - INFO - Real/Fake ratio in training: 0.135 (pos_weight)
+2023-04-15 08:03:39,168 - INFO - Model summary:
+==========================================================================================
+Layer (type:depth-idx)                   Output Shape              Param #
+==========================================================================================
+TSSD                                     [64, 1]                   --
+├─Conv1d: 1-1                            [64, 16, 64600]           112
+├─BatchNorm1d: 1-2                       [64, 16, 64600]           32
+├─RSM1D: 1-3                             [64, 32, 16150]           --
+│    └─Conv1d: 2-1                       [64, 32, 16150]           1,536
+│    └─BatchNorm1d: 2-2                  [64, 32, 16150]           64
+│    └─Conv1d: 2-3                       [64, 32, 16150]           3,072
+│    └─BatchNorm1d: 2-4                  [64, 32, 16150]           64
+│    └─Conv1d: 2-5                       [64, 32, 16150]           3,072
+│    └─Conv1d: 2-6                       [64, 32, 16150]           512
+│    └─BatchNorm1d: 2-7                  [64, 32, 16150]           64
+├─RSM1D: 1-4                             [64, 64, 4037]            --
+│    └─Conv1d: 2-8                       [64, 64, 4037]            6,144
+│    └─BatchNorm1d: 2-9                  [64, 64, 4037]            128
+│    └─Conv1d: 2-10                      [64, 64, 4037]            12,288
+│    └─BatchNorm1d: 2-11                 [64, 64, 4037]            128
+│    └─Conv1d: 2-12                      [64, 64, 4037]            12,288
+│    └─Conv1d: 2-13                      [64, 64, 4037]            2,048
+│    └─BatchNorm1d: 2-14                 [64, 64, 4037]            128
+├─RSM1D: 1-5                             [64, 128, 1009]           --
+│    └─Conv1d: 2-15                      [64, 128, 1009]           24,576
+│    └─BatchNorm1d: 2-16                 [64, 128, 1009]           256
+│    └─Conv1d: 2-17                      [64, 128, 1009]           49,152
+│    └─BatchNorm1d: 2-18                 [64, 128, 1009]           256
+│    └─Conv1d: 2-19                      [64, 128, 1009]           49,152
+│    └─Conv1d: 2-20                      [64, 128, 1009]           8,192
+│    └─BatchNorm1d: 2-21                 [64, 128, 1009]           256
+├─RSM1D: 1-6                             [64, 128, 252]            --
+│    └─Conv1d: 2-22                      [64, 128, 252]            49,152
+│    └─BatchNorm1d: 2-23                 [64, 128, 252]            256
+│    └─Conv1d: 2-24                      [64, 128, 252]            49,152
+│    └─BatchNorm1d: 2-25                 [64, 128, 252]            256
+│    └─Conv1d: 2-26                      [64, 128, 252]            49,152
+│    └─Conv1d: 2-27                      [64, 128, 252]            16,384
+│    └─BatchNorm1d: 2-28                 [64, 128, 252]            256
+├─Linear: 1-7                            [64, 64]                  8,256
+├─Linear: 1-8                            [64, 32]                  2,080
+├─Linear: 1-9                            [64, 1]                   33
+==========================================================================================
+Total params: 348,497
+Trainable params: 348,497
+Non-trainable params: 0
+Total mult-adds (G): 28.50
+==========================================================================================
+Input size (MB): 16.54
+Forward/backward pass size (MB): 4415.14
+Params size (MB): 1.39
+Estimated Total Size (MB): 4433.08
+==========================================================================================
+2023-04-15 08:03:39,271 - INFO - Loaded checkpoint from epoch 9
+2023-04-15 09:29:12,342 - INFO - [010]: loss: 0.007 - train acc: 98.75 - test acc: 89.56 - test eer : 0.1702
+2023-04-15 09:29:12,352 - INFO - Best Test Accuracy: 89.561
+2023-04-15 09:29:15,454 - INFO - Best Model Saved: saved/TSSD_wave_O/best.pt
+2023-04-15 09:29:15,475 - INFO - Prediction Saved: saved/TSSD_wave_O/best_pred.json
+2023-04-15 10:53:27,618 - INFO - [011]: loss: 0.0067 - train acc: 98.82 - test acc: 91.81 - test eer : 0.134
+2023-04-15 10:53:27,619 - INFO - Best Test Accuracy: 91.813
+2023-04-15 10:53:30,720 - INFO - Best Model Saved: saved/TSSD_wave_O/best.pt
+2023-04-15 10:53:30,730 - INFO - Prediction Saved: saved/TSSD_wave_O/best_pred.json
+2023-04-15 12:20:49,908 - INFO - [012]: loss: 0.006 - train acc: 98.92 - test acc: 95.76 - test eer : 0.0462
+2023-04-15 12:20:49,916 - INFO - Best Test Accuracy: 95.763
+2023-04-15 12:20:52,999 - INFO - Best Model Saved: saved/TSSD_wave_O/best.pt
+2023-04-15 12:20:53,010 - INFO - Prediction Saved: saved/TSSD_wave_O/best_pred.json
+2023-04-15 13:50:11,916 - INFO - [013]: loss: 0.0058 - train acc: 98.96 - test acc: 54.29 - test eer : 0.4776
+2023-04-15 15:17:00,208 - INFO - [014]: loss: 0.0052 - train acc: 99.08 - test acc: 94.75 - test eer : 0.0852
