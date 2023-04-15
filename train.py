@@ -158,9 +158,7 @@ def train(
     assert real_dir.is_dir()
     assert fake_dir.is_dir()
     melgan_dir = fake_dir / "ljspeech_melgan"
-    # melganLarge_dir = fake_dir / "ljspeech_melgan_large"
     assert melgan_dir.is_dir()
-    # assert melganLarge_dir.is_dir()
 
     LOGGER.info("Loading data...")
 
@@ -333,9 +331,7 @@ def eval_only_f(
     assert real_dir.is_dir()
     assert fake_dir.is_dir()
     melgan_dir = fake_dir / "ljspeech_melgan"
-    # melganLarge_dir = fake_dir / "ljspeech_melgan_large"
     assert melgan_dir.is_dir()
-    # assert melganLarge_dir.is_dir()
 
     LOGGER.info("Loading data...")
 
@@ -670,8 +666,8 @@ def parse_args():
         "--in_dist",
         help="Whether to use in distribution experiment setup. (default: True)",
         choices=["True", "False"],
-        type=bool,
-        default=True,
+        type=str,
+        default="True",
     )
     parser.add_argument(
         "--device",
@@ -716,12 +712,13 @@ def parse_args():
 
 def main():
     args = parse_args()
-
+    in_distribution = args.in_distribution == "True"
+    
     if args.debug_all:
         debug(args.real_dir, args.fake_dir, args.device)
         return
-
-    exp_setup = "I" if args.in_distribution else "O"
+    
+    exp_setup = "I" if in_distribution else "O"
     exp_name = f"{args.model_classname}_{args.feature_classname}_{exp_setup}"
     if args.debug:
         exp_name = "debug"
@@ -736,7 +733,7 @@ def main():
             batch_size=args.batch_size,
             feature_classname=args.feature_classname,
             model_classname=args.model_classname,
-            in_distribution=args.in_distribution,
+            in_distribution=in_distribution,
             device=args.device,
             seed=args.seed if args.deterministic else None,
             amount_to_use=160 if args.debug else None,
