@@ -55,12 +55,9 @@ def detection_method(file_path: str):
          "--device", "cpu", "--eval_one", "--test_file", file_path],
         text=True,
         capture_output=True
-    )
-    print(process.stdout.splitlines())
-    print(process.returncode)
+    )    
     
-    # return float(process.stdout.splitlines()[-2])
-    return 0.73
+    return float(process.stdout.splitlines()[-2])
 
 def results_normalization(results: Any):
     """
