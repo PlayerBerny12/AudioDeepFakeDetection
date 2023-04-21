@@ -1,4 +1,4 @@
-name: Reusable workflow example
+name: Reusable docker image build
 
 on:
   workflow_call:
