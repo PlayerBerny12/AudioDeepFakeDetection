@@ -50,17 +50,14 @@ def detection_method(file_path: str):
     Run detection method on prepared data    
     """
 
-    result = subprocess.run(
-        ["python3", "-u", "train.py", "--feature_classname", "mfcc", "--model_classname", "ShallowCNN", "--restore", 
+    process = subprocess.run(
+         ["python3", "-u", "train.py", "--feature_classname", "mfcc", "--model_classname", "ShallowCNN", "--restore", 
          "--eval_one", "--test_file", file_path],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.DEVNULL,
-        text=True
-    )
-    import sys
-    print(result.stdout)
-    sys.stdout.flush()
-    return float(result.stdout.splitlines()[-2])
+        text=True,
+        capture_output=True
+    )    
+    
+    return float(process.stdout.splitlines()[-2])
 
 def results_normalization(results: Any):
     """

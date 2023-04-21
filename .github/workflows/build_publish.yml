@@ -7,9 +7,35 @@ on:
 
 
 jobs:
-  build-and-push-image1:      
+  image1:      
     uses: ./.github/workflows/build_publish_template.yml
     with:
       dockerfile-path: Dockerfile-ShallowCNN_lfcc_I
       docker-name: dfdf-detection-audio-1
+  image2:      
+    uses: ./.github/workflows/build_publish_template.yml
+    with:
+      dockerfile-path: Dockerfile-ShallowCNN_lfcc_O
+      docker-name: dfdf-detection-audio-2
+  image3:      
+    uses: ./.github/workflows/build_publish_template.yml
+    with:
+      dockerfile-path: Dockerfile-ShallowCNN_mfcc_I
+      docker-name: dfdf-detection-audio-3
+  image4:      
+    uses: ./.github/workflows/build_publish_template.yml
+    with:
+      dockerfile-path: Dockerfile-ShallowCNN_mfcc_O
+      docker-name: dfdf-detection-audio-4
+  image5:      
+    uses: ./.github/workflows/build_publish_template.yml
+    with:
+      dockerfile-path: Dockerfile-TSSD_wave_I
+      docker-name: dfdf-detection-audio-5
+  image6:      
+    uses: ./.github/workflows/build_publish_template.yml
+    with:
+      dockerfile-path: Dockerfile-TSSD_wave_O
+      docker-name: dfdf-detection-audio-6
+      
     
