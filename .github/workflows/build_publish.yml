@@ -12,4 +12,4 @@ jobs:
     with:
       dockerfile-path: Dockerfile-ShallowCNN_lfcc_I
       docker-name: dfdf-detection-audio-1
-    secrets: inherit
+    
