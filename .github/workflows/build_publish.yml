@@ -1,0 +1,15 @@
+name: Create and publish a Docker image
+
+on:
+  push:
+    branches: ['master']
+
+
+
+jobs:
+  build-and-push-image1:      
+    uses: ./.github/workflows/build_publish_template.yml
+    with:
+      dockerfile-path: Dockerfile-ShallowCNN_lfcc_I
+      docker-name: dfdf-detection-audio-1
+    secrets: inherit

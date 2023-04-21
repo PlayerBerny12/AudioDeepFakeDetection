@@ -83,7 +83,7 @@ def init_logger(log_file: Union[Path, str]) -> None:
     return None
 
 
-def train(
+def train_f(
     real_dir: Union[Path, str],
     fake_dir: Union[Path, str],
     amount_to_use: int = None,
@@ -563,7 +563,7 @@ def experiment(
                 checkpoint=ckpt,
             )   
         else:
-            train(
+            train_f(
                 real_dir=real_dir,
                 fake_dir=fake_dir,
                 amount_to_use=amount_to_use,
@@ -741,9 +741,9 @@ def main():
             eval_only=args.eval_only,
             eval_one=args.eval_one,
         )
-        printc(f">>>>> Experiment Done: {exp_name}\n\n")
+        printc(f">>>>> Experiment Done: {exp_name}")
     except Exception as e:
-        printc(f">>>>> Experiment Failed: {exp_name}\n\n", color="red")
+        printc(f">>>>> Experiment Failed: {exp_name}", color="red")
         LOGGER.exception(e)
 
 

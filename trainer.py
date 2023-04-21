@@ -289,7 +289,7 @@ class ModelTrainer(Trainer):
             # forward / inference
             batch_out = model(batch_x)
             # get binary prediction {0, 1}
-            batch_pred = (torch.sigmoid(batch_out) + 0.5).int()
+            batch_pred = (torch.sigmoid(batch_out))
             
-            print(batch_out)
-            print(batch_pred)
+            print(batch_out.item())
+            print(batch_pred.item())
