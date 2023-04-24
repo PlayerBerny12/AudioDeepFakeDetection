@@ -26,8 +26,7 @@ import subprocess
 
 app = FastAPI()
 
-NAME = "Method name"
-DESCRIPTION = "Method description"
+ID = 2
 
 def check_request(file_path: str):
     """
@@ -83,6 +82,6 @@ def detect(id: int, checksum: str, filename: str, status: int, type: int):
         # Convert results to interval <0-1> (optional)
         results = results_normalization(results)
 
-        return {"RequestID": id, "Value": results, "Name": NAME, "Description": DESCRIPTION}
+        return {"RequestID": id, "Value": results, "MethodID": ID}
     else:
-        return {"RequestID": id, "Value": -1, "Name": NAME, "Description": DESCRIPTION}
+        return {"RequestID": id, "Value": -1, "MethodID": ID}
