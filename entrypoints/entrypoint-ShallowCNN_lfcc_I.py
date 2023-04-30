@@ -23,6 +23,7 @@ from fastapi import FastAPI
 from typing import Any
 
 import subprocess 
+import pathlib
 
 app = FastAPI()
 
@@ -32,7 +33,12 @@ def check_request(file_path: str):
     """
     Check file type if it is processable
     """
-    return True
+    file_extension = pathlib.Path(file_path).suffix
+    
+    if file_extension == ".wav":
+        return True
+    else: 
+        return False
 
 def data_preparation(file_path: str):
     """
