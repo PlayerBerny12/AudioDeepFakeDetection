@@ -56,7 +56,10 @@ def detection_method(file_path: str):
         capture_output=True
     )    
     
-    return float(process.stdout.splitlines()[-2])
+    try:
+        return float(process.stdout.splitlines()[-2])
+    except:
+        return None
 
 def results_normalization(results: Any):
     """
@@ -80,8 +83,9 @@ def detect(id: int, checksum: str, filename: str, status: int, type: int):
         results = detection_method(file_path)
         
         # Convert results to interval <0-1> (optional)
-        results = results_normalization(results)
+        if results:
+            results = results_normalization(results)
 
         return {"RequestID": id, "Value": results, "MethodID": ID}
     else:
-        return {"RequestID": id, "Value": -1, "MethodID": ID}
+        return {"RequestID": id, "Value": None, "MethodID": ID}
