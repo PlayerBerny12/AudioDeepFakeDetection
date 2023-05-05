@@ -1,16 +1,17 @@
 FROM python:3.10-slim
 
+COPY requirements.txt ./
+RUN python3 -m pip install -U pip wheel setuptools --no-cache-dir && \
+    python3 -m pip install torch==1.13.1+cpu torchvision==0.14.1+cpu torchaudio==0.13.1 --extra-index-url https://download.pytorch.org/whl/cpu --no-cache-dir && \
+    python3 -m pip install -r requirements.txt --no-cache-dir
+
 WORKDIR /app
 ADD models/ models/
 ADD module/ module/
 ADD preprocess/ preprocess/
 ADD samples/ samples/
+COPY analyze.py DataLoader.py metrics.py train.py trainer.py utils.py ./
 ADD saved/ShallowCNN_mfcc_I/ saved/ShallowCNN_mfcc_I/
-COPY analyze.py DataLoader.py metrics.py train.py trainer.py utils.py requirements.txt ./
 COPY entrypoints/entrypoint-ShallowCNN_mfcc_I.py entrypoint.py
-
-RUN python3 -m pip install -U pip wheel setuptools --no-cache-dir && \
-    python3 -m pip install torch==1.13.1+cpu torchvision==0.14.1+cpu torchaudio==0.13.1 --extra-index-url https://download.pytorch.org/whl/cpu --no-cache-dir && \
-    python3 -m pip install -r requirements.txt --no-cache-dir
 
 CMD [ "uvicorn", "entrypoint:app", "--host", "0.0.0.0", "--port", "50502", "--reload"]
