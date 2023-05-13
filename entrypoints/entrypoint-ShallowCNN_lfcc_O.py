@@ -92,7 +92,7 @@ def detect(id: int, checksum: str, filename: str, status: int, type: int):
         if results:
             results = results_normalization(results)
 
-            return {"RequestID": id, "Value": results, "MethodID": ID}
+            return {"MethodID": ID, "Value": results}
         else:
             return None
     else:

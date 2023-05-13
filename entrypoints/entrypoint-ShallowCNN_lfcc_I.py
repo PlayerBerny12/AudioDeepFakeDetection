@@ -57,7 +57,7 @@ def detection_method(file_path: str):
 
     process = subprocess.run(
         ["python3", "-u", "train.py", "--feature_classname", "lfcc", "--model_classname", "ShallowCNN", "--restore",
-         "--device", "cpu", "--eval_one", "--test_file", file_path],
+         "eval_one", "--test_file", file_path],
         text=True,
         capture_output=True
     )    
@@ -92,7 +92,7 @@ def detect(id: int, checksum: str, filename: str, status: int, type: int):
         if results:
             results = results_normalization(results)
 
-            return {"RequestID": id, "Value": results, "MethodID": ID}            
+            return {"MethodID": ID, "Value": results}
         else:
             return None
     else:
