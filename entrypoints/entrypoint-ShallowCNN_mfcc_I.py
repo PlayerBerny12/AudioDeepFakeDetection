@@ -63,8 +63,8 @@ def detection_method(file_path: str):
     )    
     
     try:
+        print(process.stdout.splitlines()[-3])
         print(process.stdout.splitlines()[-2])
-        print(process.stdout.splitlines()[-1])
         return float(process.stdout.splitlines()[-2])
     except:
         return None
