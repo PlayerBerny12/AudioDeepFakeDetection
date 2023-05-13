@@ -57,7 +57,7 @@ def detection_method(file_path: str):
 
     process = subprocess.run(
         ["python3", "-u", "train.py", "--feature_classname", "lfcc", "--model_classname", "ShallowCNN", "--restore",
-         "eval_one", "--test_file", file_path],
+         "--eval_one", "--test_file", file_path],
         text=True,
         capture_output=True
     )    
